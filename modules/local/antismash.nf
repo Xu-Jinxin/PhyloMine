@@ -30,11 +30,3 @@ process ANTISMASH {
     """
 
 }
-    
-
-    antismash gencomp/skder/Dereplicated_Representative_Genomes/${genome}.fa \
-        --cpus 16 \
-        --databases /share/data01/project/xujinxin/database/antismash \
-        --genefinding-tool none \
-        --genefinding-gff3 gencomp/pyrodigal/gff/${genome}.gff \
-        --output-dir gencomp/antismash/${genome}
