@@ -7,56 +7,27 @@ nextflow.enable.dsl = 2
 // }
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
-// import functions 
+// import subworkflow
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
-include { CHECKM2 } from './modules/local/checkm2'
-include { FILTER_GENOMES } from './modules/local/checkm2'
-include { SKDER } from './modules/local/skder'
-include { GTDBTK } from './modules/local/gtdbtk'
-include { PYRODIGAL } from './modules/local/pyrodigal'
-include { ORTHOFINDER } from './modules/local/orthofinder'
-include { CLUSTER_ORTHOLOGS } from './modules/local/orthofinder'
-include { BAKTA } from './modules/local/bakta'
-include { EGGNOG } from './modules/local/eggNOG'
-include { CAZYME } from './modules/local/cazyme'
-include { RGI } from './modules/local/card'
-include { VF } from './modules/local/vf'
-include { CGCFINDER } from './modules/local/cgcfinder'
-
+include { stage_1 } from './subworkflows/stage_1'
+include { stage_2 } from './subworkflows/stage_2'
+include { stage_3 } from './subworkflows/stage_3'
+include { stage_4 } from './subworkflows/stage_4'
+include { stage_5 } from './subworkflows/stage_5'
+include { stage_6 } from './subworkflows/stage_6'
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 // run main workflow
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 
 workflow {
-    genomes_dir = Channel.fromPath("${params.input}")
-    CHECKM2(genomes_dir)
-    FILTER_GENOMES(CHECKM2.out.checkm2_dir, genomes_dir)
-    SKDER(FILTER_GENOMES.out.high_quality_genomes_dir)
-    GTDBTK(SKDER.out.rep_genomes_dir)
-    
-    rep_genome = SKDER.out.rep_genomes
-        .flatten()
-        .map { genome -> tuple(genome.baseName, genome) }
-    
-    PYRODIGAL(rep_genome)
-    ORTHOFINDER(PYRODIGAL.out.protein_file.collect())
-    CLUSTER_ORTHOLOGS(ORTHOFINDER.out.orthofinder_dir)
-    BAKTA(CLUSTER_ORTHOLOGS.out.clean_OG)
-    EGGNOG(CLUSTER_ORTHOLOGS.out.clean_OG)
-    CAZYME(CLUSTER_ORTHOLOGS.out.clean_OG)
-    RGI(CLUSTER_ORTHOLOGS.out.clean_OG)
-    VF(CLUSTER_ORTHOLOGS.out.clean_OG)
+    genomes_ch = Channel.fromPath(params.input)
 
-    protein_ch = PYRODIGAL.out.protein_file
-        .map { faa -> tuple(faa.baseName, faa) }
-    gff_ch = PYRODIGAL.out.gff_file
-        .map { gff -> tuple(gff.baseName, gff) }
-
-    cgc_input = protein_ch.join(gff_ch)
-        .map { id, faa, gff -> tuple(id, faa, gff) }
-
-    CGCFINDER(cgc_input)
-
+    stage_1(genomes_ch)
+    stage_2(stage_1.out.rep_genomes)
+    stage_3(stage_2.out.clean_OG)
+    stage_4(stage_2.out.assets_ch)
+    stage_5(stage_2.out.assets_ch)
+    stage_6(stage_2.out.filtered_og_ch)
 }
