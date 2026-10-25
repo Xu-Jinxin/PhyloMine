@@ -46,3 +46,5 @@ gtdbtk infer --msa_file gtdbtk.combine_msa.fasta.gz \
 gtdbtk root --input_tree gtdbtk.infer/gtdbtk.unrooted.tree \
     --outgroup_taxon "${outgroup_taxon}" \
     --output_tree gtdbtk.infer/gtdbtk.rooted.tree
+
+sed -i -E 's/(RS|GB)_(GC[AF]_)/\2/g' gtdbtk.infer/gtdbtk.rooted.tree

@@ -10,6 +10,7 @@ process CHECKM2 {
 
     output:
     path "checkm2", emit: checkm2_dir
+    path "checkm2/quality_report.tsv", emit: quality_report
 
     script:
     def container_db_path = '/opt/checkm2_db/uniref100.KO.1.dmnd'

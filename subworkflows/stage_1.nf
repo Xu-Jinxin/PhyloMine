@@ -25,4 +25,6 @@ workflow stage_1 {
     rep_genomes = GTDB_SELECT_REP.out.rep_genomes
     gtdbtk_out  = GTDBTK.out
     species_root_tree = ROOT_TREE.out.species_root_tree
+    gtdb_rep_genomes_list = GTDB_SELECT_REP.out.gtdb_rep_genomes_list
+    checkm2_report = CHECKM2.out.quality_report
 }
