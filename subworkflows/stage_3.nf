@@ -3,6 +3,7 @@
 nextflow.enable.dsl = 2
 
 include { BAKTA } from '../modules/bakta'
+include { BAKTFOLD} from '../modules/baktfold'
 include { EGGNOG } from '../modules/eggNOG'
 include { CAZYME } from '../modules/cazyme'
 include { RGI } from '../modules/card'
@@ -15,6 +16,7 @@ workflow stage_3 {
 
     main:
     BAKTA(clean_OG)
+    BAKTFOLD(BAKTA.out.bakta_json)
     EGGNOG(clean_OG)
     CAZYME(clean_OG)
     RGI(clean_OG)

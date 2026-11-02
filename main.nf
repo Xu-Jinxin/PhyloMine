@@ -15,7 +15,6 @@ include { stage_2 } from './subworkflows/stage_2'
 include { stage_3 } from './subworkflows/stage_3'
 include { stage_4 } from './subworkflows/stage_4'
 include { stage_5 } from './subworkflows/stage_5'
-include { stage_6 } from './subworkflows/stage_6'
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ //
 // run main workflow
@@ -28,8 +27,7 @@ workflow {
         stage_2(stage_1.out.rep_genomes)
         stage_3(stage_2.out.clean_OG)
         stage_4(stage_2.out.assets_ch)
-        stage_5(stage_2.out.assets_ch)
-        stage_6(stage_2.out.filtered_og_ch, 
+        stage_5(stage_2.out.filtered_og_ch, 
                 stage_1.out.species_root_tree, 
                 stage_1.out.gtdb_rep_genomes_list, 
                 stage_1.out.checkm2_report)
@@ -69,22 +67,4 @@ workflow stage_4_only {
         .join(gene_ch)
 
     stage_4(assets_ch)
-}
-
-workflow stage_5_only {
-    genome_ch = Channel.fromPath("${params.genome_dir}/*.${params.genome_extension}")
-        .map { genome -> tuple(genome.baseName, genome) }
-    protein_ch = Channel.fromPath("${params.proteins_dir}/*.faa")
-        .map { faa -> tuple(faa.name.replaceFirst(/\.faa$/, ''), faa) }
-    gff_ch = Channel.fromPath("${params.gff_dir}/*.gff")
-        .map { gff -> tuple(gff.name.replaceFirst(/\.gff$/, ''), gff) }
-    gene_ch = Channel.fromPath("${params.genes_dir}/*.genes.fa")
-        .map { gene -> tuple(gene.name.replaceFirst(/\.genes\.fa$/, ''), gene) }
-
-    assets_ch = genome_ch
-        .join(protein_ch)
-        .join(gff_ch)
-        .join(gene_ch)
-
-    stage_5(assets_ch)
 }
